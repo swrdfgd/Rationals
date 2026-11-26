@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rationals</title>
+
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$']]
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --sky-top: #182b5c;
+      --sky-mid: #3a6ea5;
+      --sky-warm: #f2845c;
+      --sky-gold: #ffd166;
+      --crimson: #e63946;
+      --crimson-dark: #b5172c;
+      --straw-gold: #ffbe0b;
+      --pearl-bg: rgba(255, 252, 245, 0.94);
+      --ink-dark: #1d2238;
+      --prism-1: #ff70a6;
+      --prism-2: #70d6ff;
+      --prism-3: #ffd670;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(
+        180deg,
+        var(--sky-top) 0%,
+        var(--sky-mid) 42%,
+        var(--sky-warm) 78%,
+        var(--sky-gold) 100%
+      );
+      color: var(--ink-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Drifting Cloud & Twilight Sky Layer */
+    .sky-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .sun-halo {
+      position: absolute;
+      bottom: -140px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 680px;
+      height: 680px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 243, 176, 0.65) 0%,
+        rgba(255, 190, 11, 0.25) 45%,
+        transparent 72%
+      );
+      filter: blur(12px);
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      filter: blur(2px);
+      animation: drift linear infinite;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .cloud-1 {
+      width: 240px;
+      height: 68px;
+      top: 16%;
+      left: -260px;
+      animation-duration: 52s;
+    }
+    .cloud-1::before { width: 100px; height: 100px; top: -46px; left: 36px; }
+    .cloud-1::after  { width: 130px; height: 130px; top: -64px; right: 32px; }
+
+    .cloud-2 {
+      width: 310px;
+      height: 82px;
+      top: 64%;
+      left: -340px;
+      background: rgba(255, 245, 235, 0.28);
+      animation-duration: 68s;
+      animation-delay: -18s;
+    }
+    .cloud-2::before { width: 135px; height: 135px; top: -62px; left: 48px; }
+    .cloud-2::after  { width: 160px; height: 160px; top: -78px; right: 44px; }
+
+    .cloud-3 {
+      width: 190px;
+      height: 54px;
+      top: 32%;
+      left: -220px;
+      background: rgba(255, 255, 255, 0.22);
+      animation-duration: 44s;
+      animation-delay: -9s;
+    }
+    .cloud-3::before { width: 82px; height: 82px; top: -38px; left: 28px; }
+    .cloud-3::after  { width: 96px; height: 96px; top: -46px; right: 26px; }
+
+    @keyframes drift {
+      from { transform: translateX(0); }
+      to   { transform: translateX(calc(100vw + 420px)); }
+    }
+
+    /* Header Crest */
+    header {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 26px 16px 12px;
+    }
+
+    .title-crest {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 30px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 246, 224, 0.92));
+      border: 3px solid var(--straw-gold);
+      box-shadow:
+        0 10px 28px rgba(24, 43, 92, 0.28),
+        inset 0 -3px 0 var(--crimson);
+      position: relative;
+    }
+
+    /* Downward-pointing prismatic triangle indicator at the bottom of the title */
+    .title-crest::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 14px;
+      background: linear-gradient(180deg, var(--straw-gold), var(--prism-1), var(--prism-2));
+      clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+      filter: drop-shadow(0 3px 5px rgba(24, 43, 92, 0.35));
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      background: linear-gradient(90deg, var(--crimson-dark), var(--crimson), #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Horizontal Rational Track Viewport */
+    .viewport-wrapper {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Subtle Center Spotlight */
+    .center-beacon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 170px;
+      height: 240px;
+      border-radius: 85px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.28) 0%, transparent 72%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .rationals-scroller {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      align-items: center;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+    }
+
+    .rationals-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .rationals-scroller:active {
+      cursor: grabbing;
+    }
+
+    .rationals-track {
+      display: inline-flex;
+      align-items: center;
+      height: 260px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Real Flex Spacers so both ends can always scroll to dead-center */
+    .track-spacer {
+      flex: 0 0 55vw;
+      width: 55vw;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    /* Individual Rational Slot */
+    .rational-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 0 20px;
+      flex-shrink: 0;
+    }
+
+    /* Collapsed state before expanding into view */
+    .rational-slot.entering {
+      width: 0;
+      min-width: 0;
+      margin: 0;
+      opacity: 0;
+      overflow: visible;
+    }
+
+    /* Hidden right-hand anchor (1/0) */
+    .rational-slot.hidden-anchor {
+      width: 0;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Bouncy Cloud-Capsule Card */
+    .rational-card {
+      position: relative;
+      min-width: 78px;
+      padding: 16px 24px;
+      border-radius: 34px;
+      background: var(--pearl-bg);
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 12px 26px rgba(24, 43, 92, 0.22),
+        0 4px 0 var(--crimson),
+        inset 0 2px 8px rgba(255, 255, 255, 0.9);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--ink-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transform: scale(1);
+      transition:
+        box-shadow 0.45s ease,
+        border-color 0.45s ease,
+        background 0.45s ease;
+    }
+
+    /* Elastic Pop-In Animation */
+    .rational-card.pop-in {
+      animation: elasticPop 0.72s cubic-bezier(0.34, 1.68, 0.64, 1) forwards;
+      border-color: var(--straw-gold);
+      background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #fff5f7 35%,
+        #eefaff 70%,
+        #fffbeb 100%
+      );
+      box-shadow:
+        0 0 0 6px rgba(255, 209, 102, 0.35),
+        0 16px 36px rgba(230, 57, 70, 0.36),
+        0 5px 0 var(--crimson);
+    }
+
+    @keyframes elasticPop {
+      0% {
+        transform: scale(0.05) translateY(18px);
+        opacity: 0;
+      }
+      52% {
+        transform: scale(1.26) translateY(-8px);
+        opacity: 1;
+      }
+      76% {
+        transform: scale(0.93) translateY(2px);
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Radial Burst Lines */
+    .burst-rays {
+      position: absolute;
+      inset: -26px -22px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .rational-card.pop-in .burst-rays {
+      animation: burstFlash 0.85s ease-out forwards;
+    }
+
+    .burst-rays span {
+      position: absolute;
+      width: 3.5px;
+      height: 14px;
+      border-radius: 99px;
+      background: linear-gradient(180deg, var(--crimson), var(--straw-gold));
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+    }
+
+    .burst-rays span:nth-child(1) { top: 2px; left: 26%; transform: rotate(-28deg); }
+    .burst-rays span:nth-child(2) { top: -2px; left: 50%; transform: translateX(-50%) rotate(0deg); }
+    .burst-rays span:nth-child(3) { top: 2px; right: 26%; transform: rotate(28deg); }
+    .burst-rays span:nth-child(4) { top: 22%; right: 2px; transform: rotate(62deg); }
+    .burst-rays span:nth-child(5) { bottom: 22%; right: 2px; transform: rotate(118deg); }
+    .burst-rays span:nth-child(6) { bottom: 2px; right: 26%; transform: rotate(152deg); }
+    .burst-rays span:nth-child(7) { bottom: -2px; left: 50%; transform: translateX(-50%) rotate(180deg); }
+    .burst-rays span:nth-child(8) { bottom: 2px; left: 26%; transform: rotate(-152deg); }
+
+    @keyframes burstFlash {
+      0% {
+        opacity: 0;
+        transform: scale(0.55);
+      }
+      30% {
+        opacity: 1;
+        transform: scale(1.08);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.32);
+      }
+    }
+
+    /* Minimal Bottom Controls */
+    .controls-bar {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: center;
+      padding: 16px 16px 26px;
+    }
+
+    .controls-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 24px rgba(24, 43, 92, 0.22);
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 999px;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.06);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--crimson), var(--crimson-dark));
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(230, 57, 70, 0.35);
+    }
+
+    .btn-secondary {
+      background: #fff3d6;
+      color: var(--ink-dark);
+      border: 1.5px solid var(--straw-gold);
+    }
+
+    .badge-count {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--sky-top);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(58, 110, 165, 0.12);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sky & Clouds Background -->
+  <div class="sky-layer" aria-hidden="true">
+    <div class="sun-halo"></div>
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+  </div>
+
+  <!-- Title -->
+  <header>
+    <div class="title-crest">
+      <h1>Rationals</h1>
+    </div>
+  </header>
+
+  <!-- Rational Track -->
+  <main class="viewport-wrapper">
+    <div class="center-beacon" aria-hidden="true"></div>
+    <div class="rationals-scroller" id="scroller">
+      <div class="rationals-track" id="track">
+        <div class="track-spacer" id="leftSpacer" aria-hidden="true"></div>
+        <div class="track-spacer" id="rightSpacer" aria-hidden="true"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Minimal Controls -->
+  <div class="controls-bar">
+    <div class="controls-pill">
+      <button class="btn-primary" id="toggleBtn">Pause</button>
+      <button class="btn-secondary" id="stepBtn">+1</button>
+      <button class="btn-secondary" id="speedBtn">1x</button>
+      <span class="badge-count" id="countBadge">2 rationals</span>
+    </div>
+  </div>
+
+  <script>
+    // Initial state: 0/1, 1/1, and hidden 1/0
+    const rationals = [
+      { num: 0, den: 1, hidden: false },
+      { num: 1, den: 1, hidden: false },
+      { num: 1, den: 0, hidden: true }
+    ];
+
+    const scroller = document.getElementById('scroller');
+    const track = document.getElementById('track');
+    const rightSpacer = document.getElementById('rightSpacer');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const stepBtn = document.getElementById('stepBtn');
+    const speedBtn = document.getElementById('speedBtn');
+    const countBadge = document.getElementById('countBadge');
+
+    const SLOT_MARGIN = 20;
+
+    let isRunning = true;
+    let isAnimating = false;
+    let speedMultiplier = 1;
+    let loopTimer = null;
+
+    // Simplify a/1 to a; otherwise format as a/b in MathJax
+    function formatRationalTeX(num, den) {
+      if (den === 1) {
+        return `\\(${num}\\)`;
+      }
+      return `\\(\\dfrac{${num}}{${den}}\\)`;
+    }
+
+    function createRationalElement(item, isNew = false) {
+      const slot = document.createElement('div');
+      slot.className = 'rational-slot';
+
+      if (item.hidden) {
+        slot.classList.add('hidden-anchor');
+        slot.setAttribute('aria-hidden', 'true');
+        return slot;
+      }
+
+      if (isNew) {
+        slot.classList.add('entering');
+      }
+
+      const card = document.createElement('div');
+      card.className = 'rational-card';
+      card.innerHTML = `
+        <span class="math-label">${formatRationalTeX(item.num, item.den)}</span>
+        <div class="burst-rays" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      `;
+
+      slot.appendChild(card);
+      return slot;
+    }
+
+    function getSlotElements() {
+      return track.querySelectorAll('.rational-slot');
+    }
+
+    function updateBadge() {
+      const visibleCount = rationals.filter(r => !r.hidden).length;
+      countBadge.textContent = `${visibleCount} ${visibleCount === 1 ? 'rational' : 'rationals'}`;
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function getViewportCenterX() {
+      const rect = scroller.getBoundingClientRect();
+      return rect.left + rect.width / 2;
+    }
+
+    // Smoothly scroll by a relative horizontal delta
+    function smoothScrollBy(deltaX, duration) {
+      return new Promise(resolve => {
+        const startScrollLeft = scroller.scrollLeft;
+
+        if (Math.abs(deltaX) < 1) {
+          scroller.scrollLeft = startScrollLeft + deltaX;
+          resolve();
+          return;
+        }
+
+        const startTime = performance.now();
+
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          scroller.scrollLeft = startScrollLeft + deltaX * easeInOutCubic(progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(step);
+      });
+    }
+
+    // Expand slot while keeping its live center pinned directly at the screen's horizontal center
+    function expandSlotDeadCentered(slotEl, targetWidth, duration) {
+      return new Promise(resolve => {
+        const startTime = performance.now();
+
+        function pinSlotToCenter() {
+          const slotRect = slotEl.getBoundingClientRect();
+          const slotCenterX = slotRect.left + slotRect.width / 2;
+          const errorX = slotCenterX - getViewportCenterX();
+          scroller.scrollLeft += errorX;
+        }
+
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeInOutCubic(progress);
+
+          slotEl.style.width = `${targetWidth * eased}px`;
+          slotEl.style.margin = `0 ${SLOT_MARGIN * eased}px`;
+          slotEl.style.opacity = `${Math.min(1, progress * 2.5)}`;
+          pinSlotToCenter();
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            slotEl.style.width = '';
+            slotEl.style.margin = '';
+            slotEl.style.opacity = '';
+            slotEl.classList.remove('entering');
+            pinSlotToCenter();
+            resolve();
+          }
+        }
+
+        requestAnimationFrame(step);
+      });
+    }
+
+    // Perform one random mediant insertion
+    async function insertRandomRational() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      try {
+        // Pick a random gap between two adjacent entries
+        const gapIndex = Math.floor(Math.random() * (rationals.length - 1));
+        const leftItem = rationals[gapIndex];
+        const rightItem = rationals[gapIndex + 1];
+
+        const newItem = {
+          num: leftItem.num + rightItem.num,
+          den: leftItem.den + rightItem.den,
+          hidden: false
+        };
+
+        const slotElements = getSlotElements();
+        const leftEl = slotElements[gapIndex];
+        const rightEl = slotElements[gapIndex + 1];
+
+        // Measure target insertion midpoint in live screen coordinates
+        const viewportCenterX = getViewportCenterX();
+        const leftRect = leftEl.getBoundingClientRect();
+        const leftCenter = leftRect.left + leftRect.width / 2;
+
+        let gapScreenX;
+        if (rightItem.hidden) {
+          gapScreenX = leftRect.right + SLOT_MARGIN + 39;
+        } else {
+          const rightRect = rightEl.getBoundingClientRect();
+          const rightCenter = rightRect.left + rightRect.width / 2;
+          gapScreenX = (leftCenter + rightCenter) / 2;
+        }
+
+        // 1. Scroll smoothly to the insertion spot
+        const scrollDuration = Math.max(220, 540 / speedMultiplier);
+        await smoothScrollBy(gapScreenX - viewportCenterX, scrollDuration);
+
+        // 2. Insert the new rational element and render with MathJax
+        rationals.splice(gapIndex + 1, 0, newItem);
+        const newEl = createRationalElement(newItem, true);
+        track.insertBefore(newEl, rightEl);
+        updateBadge();
+
+        if (window.MathJax && MathJax.typesetPromise) {
+          await MathJax.typesetPromise([newEl]);
+        }
+
+        const card = newEl.querySelector('.rational-card');
+        const measuredCardWidth = Math.max(78, Math.ceil(card.getBoundingClientRect().width));
+
+        // 3. Expand symmetrically around dead-center and pop in
+        card.classList.add('pop-in');
+        const expandDuration = Math.max(180, 340 / speedMultiplier);
+        await expandSlotDeadCentered(newEl, measuredCardWidth, expandDuration);
+
+        setTimeout(() => {
+          card.classList.remove('pop-in');
+        }, Math.max(450, 900 / speedMultiplier));
+
+        await new Promise(r => setTimeout(r, Math.max(180, 380 / speedMultiplier)));
+      } finally {
+        isAnimating = false;
+      }
+    }
+
+    function scheduleNext() {
+      clearTimeout(loopTimer);
+      if (!isRunning) return;
+
+      const delay = Math.max(220, 680 / speedMultiplier);
+      loopTimer = setTimeout(async () => {
+        await insertRandomRational();
+        scheduleNext();
+      }, delay);
+    }
+
+    async function init() {
+      rationals.forEach(item => {
+        track.insertBefore(createRationalElement(item, false), rightSpacer);
+      });
+      updateBadge();
+
+      const waitMathJax = () => new Promise(resolve => {
+        const check = () => {
+          if (window.MathJax && MathJax.typesetPromise) resolve();
+          else setTimeout(check, 50);
+        };
+        check();
+      });
+
+      await waitMathJax();
+      await MathJax.typesetPromise([track]);
+
+      // Center initial view directly between 0 and 1
+      const slots = getSlotElements();
+      const firstRect = slots[0].getBoundingClientRect();
+      const secondRect = slots[1].getBoundingClientRect();
+      const initialMidX = (firstRect.left + firstRect.width / 2 + secondRect.left + secondRect.width / 2) / 2;
+      scroller.scrollLeft += initialMidX - getViewportCenterX();
+
+      scheduleNext();
+    }
+
+    // Controls
+    toggleBtn.addEventListener('click', () => {
+      isRunning = !isRunning;
+      toggleBtn.textContent = isRunning ? 'Pause' : 'Resume';
+      if (isRunning) {
+        scheduleNext();
+      } else {
+        clearTimeout(loopTimer);
+      }
+    });
+
+    stepBtn.addEventListener('click', async () => {
+      if (isRunning) {
+        isRunning = false;
+        toggleBtn.textContent = 'Resume';
+        clearTimeout(loopTimer);
+      }
+      await insertRandomRational();
+    });
+
+    speedBtn.addEventListener('click', () => {
+      const speeds = [1, 2, 4];
+      const nextIdx = (speeds.indexOf(speedMultiplier) + 1) % speeds.length;
+      speedMultiplier = speeds[nextIdx];
+      speedBtn.textContent = `${speedMultiplier}x`;
+    });
+
+    // Horizontal drag & mouse-wheel scrolling
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragScrollLeft = 0;
+
+    scroller.addEventListener('mousedown', e => {
+      isDragging = true;
+      dragStartX = e.pageX - scroller.offsetLeft;
+      dragScrollLeft = scroller.scrollLeft;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    scroller.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - scroller.offsetLeft;
+      scroller.scrollLeft = dragScrollLeft - (x - dragStartX);
+    });
+
+    scroller.addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        scroller.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+
+    init();
+  </script>
+</body>
+</html>
